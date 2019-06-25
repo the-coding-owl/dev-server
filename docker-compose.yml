@@ -1,0 +1,55 @@
+
+version: "3.7"
+services:
+    php73:
+        container_name: picloud-ditscheid_php73
+        build:
+            context: .
+            dockerfile: php/php-fpm73.Dockerfile
+        restart: always
+        ports:
+            - 9073:9000
+        volumes:
+            - /var/www/vhosts:/var/www/vhosts
+        depends_on:
+            - mysql
+        links:
+            - mysql:database
+        environment:
+            - APACHE_RUN_USER:www-data
+    php56:
+        container_name: picloud-ditscheid_php56
+        build:
+            context: .
+            dockerfile: php/php-fpm56.Dockerfile
+        restart: always
+        ports:
+            - 9056:9000
+        volumes:
+            - /var/www/vhosts:/var/www/vhosts
+        depends_on:
+            - mysql
+        links:
+            - mysql:database
+        environment:
+            - APACHE_RUN_USER:www-data
+    apache:
+        container_name: picloud-ditscheid_apache
+        image: httpd:2.4
+        restart: always
+        network_mode: "host"
+        volumes:
+            - /var/www/vhosts:/var/www/vhosts
+            - ./logs:/var/logs
+            - ./apache/apache.conf:/usr/local/apache2/conf/extra/apache.conf
+            - ./apache/httpd.conf:/usr/local/apache2/conf/httpd.conf
+            - ./apache/dev.key:/etc/cert/dev.key
+            - ./apache/dev.cert:/etc/cert/dev.cert
+    mysql:
+        container_name: picloud-ditscheid_mysql
+        image: webhippie/mariadb
+        restart: always
+        environment:
+            MARIADB_ROOT_PASSWORD: typo3
+        volumes:
+            - ./mysql:/var/lib/mysql
